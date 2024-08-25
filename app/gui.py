@@ -58,12 +58,13 @@ class GUI(QWidget):
         # Create a WhatsApp instance
         whatsapp = WhatsApp()
 
-        # Create a QThread to perform the Selenium operations
         self.thread_pool = QThreadPool.globalInstance()
         whatsapp_runnable = WhatsAppRunnable(whatsapp, message, phone)
-        sender = self.thread_pool.start(whatsapp_runnable)
-        print(sender)
-        if sender:
-            QMessageBox.information(self, "Broadcast Status", sender)
-            self.start_button.setEnabled(True)
-            self.start_button.setText("Start Broadcast")
+        whatsapp_runnable.signals.finished.connect(self.on_whatsapp_runnable_finished)
+        self.thread_pool.start(whatsapp_runnable)
+
+    def on_whatsapp_runnable_finished(self):
+        print("WhatsAppRunnable thread finished")
+        QMessageBox.information(self, "Broadcast Status", "WhatsAppRunnable thread finished")
+        self.start_button.setEnabled(True)
+        self.start_button.setText("Start Broadcast")

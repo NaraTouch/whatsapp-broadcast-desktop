@@ -28,15 +28,16 @@ class WhatsApp(QObject):
             return self.driver
         except Exception as e:
             return None
+        
+    def on_message_sent(self):
+        self.finished.emit()
 
     def send_message(self, message, phone):
         self.driver = self.setup_browser()
         if self.driver is None:
             self.finished.emit()
             return
-        sender = self.start_send_message(message, phone)
-        print(sender)
-        self.finished.emit()
+        self.start_send_message(message, phone)
 
     def start_send_message(self, message, phone):
         driver = self.driver
@@ -80,6 +81,8 @@ class WhatsApp(QObject):
             )
             send_button_div.click()
             time.sleep(5)
+            self.on_message_sent()
             return "success"
         except Exception as e:
+            self.on_message_sent()
             return e
