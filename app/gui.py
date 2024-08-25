@@ -40,16 +40,7 @@ class GUI(QWidget):
         layout.addWidget(profile_label)
         layout.addWidget(self.profile_edit)
 
-        # # Phone Number field
-        # phone_label = QLabel("Phone Number:")
-        # phone_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
-        # self.phone_edit = QLineEdit()
-        # self.phone_edit.setPlaceholderText("EX: +855xxxxxx")  # Add a placeholder text
-        # self.phone_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        # layout.addWidget(phone_label)
-        # layout.addWidget(self.phone_edit)
-
-         # Message field
+        # Message field
         phone_label = QLabel("Phone Numbers:")
         phone_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.phone_edit = QTextEdit()
