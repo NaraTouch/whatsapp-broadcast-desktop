@@ -13,6 +13,30 @@ Requirements:
 Run as dev:
 
     # python run.py
-pyinstaller.exe --onefile --windowed --icon=C:\python\whatsapp-broadcast-desktop\resources\icons\app_icon.ico --debug C:\python\whatsapp-broadcast-desktop\run.py
 
-pyinstaller.exe --onefile --windowed --icon=resources\icons\app_icon.ico run.py
+Make .exe
+# pyinstaller run.py --onefile --windowed
+
+OPTION Rebuild
+# pyinstaller run.spec
+
+OPTION Error
+
+Open CMD -> cd: C:\Users\User\AppData\Local\Programs\Python\Python312
+         ->pip install PyQt5
+         ->pip install selenium
+         ->pip install pyperclip
+         ->pip install webdriver-manager
+
+         >>python
+         >>import pyperclip
+         >>pyperclip.__version__
+         >>import PyQt5
+         >>PyQt5.__version__
+         >>import selenium
+         >>selenium.__version__
+         >>import webdriver_manager
+         >>webdriver_manager.__version__
+Go to Project Directory
+Open CD:
+# pyinstaller --onefile --windowed --hidden-import=webdriver_manager --hidden-import=selenium --hidden-import=pyperclip --hidden-import=PyQt5 run.py
