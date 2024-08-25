@@ -1,9 +1,8 @@
-
 import os
 import re
 import sys
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QTextEdit,
-                             QPushButton, QVBoxLayout, QMessageBox)
+                             QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout)
 from PyQt5.QtCore import QThreadPool
 from .whatsapp import WhatsApp
 from .whatsapp_runnable import WhatsAppRunnable
@@ -21,12 +20,65 @@ class GUI(QWidget):
             icon_path = 'app_icon.png'
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("WhatsApp Broadcast")
-        # self.setGeometry(300, 300, 400, 350)  # Increased height to accommodate larger widgets
         self.setMaximumSize(1600, 1200)
         self.setMinimumSize(800, 600)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
+
+        # Login section
+        self.login_section = QWidget()
+        login_layout = QVBoxLayout()
+        self.login_section.setLayout(login_layout)
+        self.login_section.setContentsMargins(20, 20, 20, 20)
+       
+
+        self.image_edit = QTextEdit()
+        self.image_edit.setStyleSheet("background-color: transparent; border: none; padding: 5px;")
+        self.image_edit.setDisabled(True)
+        login_layout.addWidget(self.image_edit)
         
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)  # Add some padding around the layout
+        username_label = QLabel("Username")
+        username_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        self.username_entry = QLineEdit()
+        self.username_entry.setPlaceholderText(r"EX: example")
+        self.username_entry.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+        login_layout.addWidget(username_label)
+        login_layout.addWidget(self.username_entry)
+
+        password_label = QLabel("Password")
+        password_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        self.password_entry = QLineEdit()
+        self.password_entry.setEchoMode(QLineEdit.Password)
+        self.password_entry.setPlaceholderText(r"EX: XXX@xxx")
+        self.password_entry.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+        login_layout.addWidget(password_label)
+        login_layout.addWidget(self.password_entry)
+
+        login_button = QPushButton("Login")
+        login_button.setStyleSheet(
+            "background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
+        )
+        login_layout.addWidget(login_button)
+        self.main_layout.addWidget(self.login_section)
+        login_button.clicked.connect(self.check_credentials)
+        self.setLayout(self.main_layout)
+
+    def check_credentials(self):
+        username = self.username_entry.text()
+        password = self.password_entry.text()
+        # Replace with your own user validation logic
+        if username == "admin" and password == "password":
+            # Login successful, hide the login section and show the main GUI
+            self.login_section.hide()
+            self.show_main_gui()
+        else:
+            QMessageBox.critical(self, "Error", "Invalid credentials")
+
+    def show_main_gui(self):
+        main_widgets_section = QWidget()
+        main_widgets_layout = QVBoxLayout()
+        main_widgets_section.setLayout(main_widgets_layout)
 
         # Chrome Profile field
         user_data_dir_label = QLabel("Chrome Profile:")
@@ -34,8 +86,8 @@ class GUI(QWidget):
         self.user_data_dir_edit = QLineEdit()
         self.user_data_dir_edit.setPlaceholderText(r"EX: C:\Users\User\AppData\Local\Google\Chrome\User Data")
         self.user_data_dir_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        layout.addWidget(user_data_dir_label)
-        layout.addWidget(self.user_data_dir_edit)
+        main_widgets_layout.addWidget(user_data_dir_label)
+        main_widgets_layout.addWidget(self.user_data_dir_edit)
 
         # Profile field
         profile_label = QLabel("Profile:")
@@ -43,17 +95,17 @@ class GUI(QWidget):
         self.profile_edit = QLineEdit()
         self.profile_edit.setPlaceholderText("EX: Profile 3")  # Add a placeholder text
         self.profile_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        layout.addWidget(profile_label)
-        layout.addWidget(self.profile_edit)
+        main_widgets_layout.addWidget(profile_label)
+        main_widgets_layout.addWidget(self.profile_edit)
 
-        # Message field
+        # Phone Number field
         phone_label = QLabel("Phone Numbers:")
         phone_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.phone_edit = QTextEdit()
         self.phone_edit.setPlaceholderText("EX:\n +855xxxxxx\n +855xxxxxx\n +855xxxxxx\n +855xxxxxx")
         self.phone_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        layout.addWidget(phone_label)
-        layout.addWidget(self.phone_edit)
+        main_widgets_layout.addWidget(phone_label)
+        main_widgets_layout.addWidget(self.phone_edit)
 
         # Message field
         message_label = QLabel("Message:")
@@ -61,19 +113,18 @@ class GUI(QWidget):
         self.message_edit = QTextEdit()
         self.message_edit.setPlaceholderText("Enter message")  # Add a placeholder text
         self.message_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        layout.addWidget(message_label)
-        layout.addWidget(self.message_edit)
+        main_widgets_layout.addWidget(message_label)
+        main_widgets_layout.addWidget(self.message_edit)
         
         # Start broadcast button
         self.start_button = QPushButton("Start Broadcast")
         self.start_button.setStyleSheet(
             "background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
         )
-        # self.start_button.clicked.connect(self.startBroadcast)
         self.start_button.clicked.connect(self.onStartButtonClick)
-        layout.addWidget(self.start_button)
+        main_widgets_layout.addWidget(self.start_button)
 
-        self.setLayout(layout)
+        self.main_layout.addWidget(main_widgets_section)
 
     def onStartButtonClick(self):
         if self.validate_input():
@@ -124,12 +175,6 @@ class GUI(QWidget):
             QMessageBox.critical(self, "Error", "Invalid Profile name")
             return False
 
-        # # Phone Number field
-        # phone_number = self.phone_edit.text()
-        # if not re.match(r"^(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})$", phone_number):
-        #     QMessageBox.critical(self, "Error", "Invalid Phone Number")
-        #     return False
-        # Phone Number field
         phone_numbers = self.phone_edit.toPlainText()
         phone_number_pattern = r"^((\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})(,|\s|\n|$))+$"
         if not re.match(phone_number_pattern, phone_numbers):
