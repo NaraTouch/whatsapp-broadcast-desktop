@@ -40,3 +40,4 @@ Open CMD -> cd: C:\Users\User\AppData\Local\Programs\Python\Python312
 Go to Project Directory
 Open CD:
 # pyinstaller --onefile --windowed --hidden-import=webdriver_manager --hidden-import=selenium --hidden-import=pyperclip --hidden-import=PyQt5 run.py
+# pyinstaller --onefile --windowed --icon=app_icon.ico --add-data "app_icon.png;." --hidden-import=webdriver_manager --hidden-import=selenium --hidden-import=pyperclip --hidden-import=PyQt5 run.py

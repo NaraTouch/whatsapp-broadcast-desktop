@@ -1,5 +1,7 @@
 
+import os
 import re
+import sys
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QTextEdit,
                              QPushButton, QVBoxLayout, QMessageBox)
 from PyQt5.QtCore import QThreadPool
@@ -13,8 +15,12 @@ class GUI(QWidget):
         self.initUI()
 
     def initUI(self):
+        if hasattr(sys, '_MEIPASS'):
+            icon_path = os.path.join(sys._MEIPASS, 'app_icon.png')
+        else:
+            icon_path = 'app_icon.png'
+        self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("WhatsApp Broadcast")
-        self.setWindowIcon(QIcon("resources/icons/app_icon.png"))
         # self.setGeometry(300, 300, 400, 350)  # Increased height to accommodate larger widgets
         self.setMaximumSize(1600, 1200)
         self.setMinimumSize(800, 600)
