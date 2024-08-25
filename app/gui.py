@@ -15,8 +15,10 @@ class GUI(QWidget):
     def initUI(self):
         self.setWindowTitle("WhatsApp Broadcast")
         self.setWindowIcon(QIcon("resources/icons/app_icon.png"))
-        self.setGeometry(300, 300, 400, 350)  # Increased height to accommodate larger widgets
-
+        # self.setGeometry(300, 300, 400, 350)  # Increased height to accommodate larger widgets
+        self.setMaximumSize(1600, 1200)
+        self.setMinimumSize(800, 600)
+        
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)  # Add some padding around the layout
 
@@ -38,11 +40,20 @@ class GUI(QWidget):
         layout.addWidget(profile_label)
         layout.addWidget(self.profile_edit)
 
-        # Phone Number field
-        phone_label = QLabel("Phone Number:")
+        # # Phone Number field
+        # phone_label = QLabel("Phone Number:")
+        # phone_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        # self.phone_edit = QLineEdit()
+        # self.phone_edit.setPlaceholderText("EX: +855xxxxxx")  # Add a placeholder text
+        # self.phone_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+        # layout.addWidget(phone_label)
+        # layout.addWidget(self.phone_edit)
+
+         # Message field
+        phone_label = QLabel("Phone Numbers:")
         phone_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
-        self.phone_edit = QLineEdit()
-        self.phone_edit.setPlaceholderText("EX: +855xxxxxx")  # Add a placeholder text
+        self.phone_edit = QTextEdit()
+        self.phone_edit.setPlaceholderText("EX:\n +855xxxxxx\n +855xxxxxx\n +855xxxxxx\n +855xxxxxx")
         self.phone_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
         layout.addWidget(phone_label)
         layout.addWidget(self.phone_edit)
@@ -80,14 +91,17 @@ class GUI(QWidget):
         self.start_button.setText("Loading...")
 
         message = self.message_edit.toPlainText()
-        phone = self.phone_edit.text()
+        # phone = self.phone_edit.text()
+        phone_numbers = self.phone_edit.toPlainText()
+        phone_number_list = [phone_number.strip() for phone_number in phone_numbers.replace(',', '\n').split()]
+        
         user_data_dir = self.user_data_dir_edit.text()
         profile = self.profile_edit.text()
         # Create a WhatsApp instance
         whatsapp = WhatsApp()
 
         self.thread_pool = QThreadPool.globalInstance()
-        whatsapp_runnable = WhatsAppRunnable(whatsapp, message, phone, user_data_dir, profile)
+        whatsapp_runnable = WhatsAppRunnable(whatsapp, message, phone_number_list, user_data_dir, profile)
         whatsapp_runnable.signals.finished.connect(self.on_whatsapp_runnable_finished)
         self.thread_pool.start(whatsapp_runnable)
 
@@ -113,10 +127,16 @@ class GUI(QWidget):
             QMessageBox.critical(self, "Error", "Invalid Profile name")
             return False
 
+        # # Phone Number field
+        # phone_number = self.phone_edit.text()
+        # if not re.match(r"^(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})$", phone_number):
+        #     QMessageBox.critical(self, "Error", "Invalid Phone Number")
+        #     return False
         # Phone Number field
-        phone_number = self.phone_edit.text()
-        if not re.match(r"^(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})$", phone_number):
-            QMessageBox.critical(self, "Error", "Invalid Phone Number")
+        phone_numbers = self.phone_edit.toPlainText()
+        phone_number_pattern = r"^((\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})(,|\s|\n|$))+$"
+        if not re.match(phone_number_pattern, phone_numbers):
+            QMessageBox.critical(self, "Error", "Invalid Phone Number(s)")
             return False
 
         # Message field
