@@ -10,17 +10,20 @@ from selenium.webdriver.common.by import By
 from PyQt5.QtCore import pyqtSignal, QObject
 
 class WhatsApp(QObject):
-    finished = pyqtSignal()
+    finished = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
-        self.options = Options()
-        self.options.add_argument("--user-data-dir=C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data")
-        self.options.add_argument("--profile 3")
-        self.options.add_argument("--disable-tflite-xnnpack")
+        # self.options.add_argument("--user-data-dir=C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data")
+        # self.options.add_argument("--profile 3")
+        # self.options.add_argument("--disable-tflite-xnnpack")
 
-    def setup_browser(self):
+    def setup_browser(self, user_data_dir, profile):
         try:
+            self.options = Options()
+            self.options.add_argument(f"--user-data-dir={user_data_dir}")
+            self.options.add_argument(f"--{profile}")
+            self.options.add_argument("--disable-tflite-xnnpack")
             service = Service(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service, options=self.options)
             self.driver.get("https://web.whatsapp.com/")
@@ -29,15 +32,16 @@ class WhatsApp(QObject):
         except Exception as e:
             return None
         
-    def on_message_sent(self):
-        self.finished.emit()
+    def on_message_sent(self, status):
+        self.finished.emit(status)
 
-    def send_message(self, message, phone):
-        self.driver = self.setup_browser()
+    def send_message(self, message, phone, user_data_dir, profile):
+        self.driver = self.setup_browser(user_data_dir, profile)
         if self.driver is None:
-            self.finished.emit()
-            return
-        self.start_send_message(message, phone)
+            # self.finished.emit()
+            self.on_message_sent("Before start please exit chrome browser at first")
+            return "Before start please exit chrome browser at first"
+        return self.start_send_message(message, phone)
 
     def start_send_message(self, message, phone):
         driver = self.driver
@@ -81,8 +85,9 @@ class WhatsApp(QObject):
             )
             send_button_div.click()
             time.sleep(5)
-            self.on_message_sent()
+            self.on_message_sent("success")
             return "success"
         except Exception as e:
-            self.on_message_sent()
-            return e
+            # self.on_message_sent(str(e))
+            self.on_message_sent("failed")
+            return "failed"
