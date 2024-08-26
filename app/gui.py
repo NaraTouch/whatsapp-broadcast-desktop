@@ -4,8 +4,12 @@ import sys
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QTextEdit,
                              QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout)
 from PyQt5.QtCore import QThreadPool
+
+
 from .whatsapp import WhatsApp
 from .whatsapp_runnable import WhatsAppRunnable
+from .login_runnable import LoginRunnable
+from .api import Api
 from PyQt5.QtGui import QIcon
 
 class GUI(QWidget):
@@ -54,26 +58,51 @@ class GUI(QWidget):
         self.password_entry.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
         login_layout.addWidget(password_label)
         login_layout.addWidget(self.password_entry)
-
-        login_button = QPushButton("Login")
-        login_button.setStyleSheet(
+        self.login_button = QPushButton("Login")
+        self.login_button.setStyleSheet(
             "background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
         )
-        login_layout.addWidget(login_button)
+        login_layout.addWidget(self.login_button)
         self.main_layout.addWidget(self.login_section)
-        login_button.clicked.connect(self.check_credentials)
+        self.login_button.clicked.connect(self.onLoginClick)
         self.setLayout(self.main_layout)
 
-    def check_credentials(self):
+    def onLoginClick(self):
+        if self.validate_login_input():
+            self.startLogin()
+        else:
+            print("Invalid input")
+
+    def startLogin(self):
+        self.login_button.setEnabled(False)
+        self.login_button.setText("Loading...")
+        self.login_button.setStyleSheet(
+            "background-color: #007bff; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
+            "cursor: wait;"  # Change the cursor to a wait cursor
+        )
+
         username = self.username_entry.text()
         password = self.password_entry.text()
-        # Replace with your own user validation logic
-        if username == "admin" and password == "password":
-            # Login successful, hide the login section and show the main GUI
+        api = Api()
+        self.thread_api = QThreadPool.globalInstance()
+        login_runnable = LoginRunnable(api, username, password)
+        login_runnable.signals.finished.connect(self.on_login_runnable_finished)
+        self.thread_api.start(login_runnable)
+
+    def on_login_runnable_finished(self, response):
+        print(response)
+        if response['statusCode'] == 200:
             self.login_section.hide()
             self.show_main_gui()
         else:
-            QMessageBox.critical(self, "Error", "Invalid credentials")
+            error_message = response['message']
+            QMessageBox.critical(self, "Error", error_message)
+
+        self.login_button.setEnabled(True)
+        self.login_button.setText("Login")
+        self.login_button.setStyleSheet(
+            "background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
+        )
 
     def show_main_gui(self):
         main_widgets_section = QWidget()
@@ -137,6 +166,10 @@ class GUI(QWidget):
         # Get the user input
         self.start_button.setEnabled(False)
         self.start_button.setText("Loading...")
+        self.start_button.setStyleSheet(
+            "background-color: #007bff; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
+            "cursor: wait;"  # Change the cursor to a wait cursor
+        )
 
         message = self.message_edit.toPlainText()
         # phone = self.phone_edit.text()
@@ -161,7 +194,27 @@ class GUI(QWidget):
             QMessageBox.information(self, "Broadcast Status", str(status))
         self.start_button.setEnabled(True)
         self.start_button.setText("Start Broadcast")
+        self.start_button.setStyleSheet(
+            "background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px;"
+            "cursor: wait;"  # Change the cursor to a wait cursor
+        )
 
+    def validate_login_input(self):
+        # username
+        username = self.username_entry.text()
+        print(username)
+        if not re.match(r"^.{3,50}$", username):
+            QMessageBox.critical(self, "Error", "Invalid Username. Username should be between 3 and 50 characters.")
+            return False
+        
+        # password
+        password = self.password_entry.text()
+        print(password)
+        if not re.match(r"^.{8,50}$", password):
+            QMessageBox.critical(self, "Error", "Invalid Password. Password should be between 8 and 50 characters.")
+            return False
+        return True
+        
     def validate_input(self):
         # Chrome Profile field
         user_data_dir = self.user_data_dir_edit.text()
