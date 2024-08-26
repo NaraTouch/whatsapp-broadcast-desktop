@@ -51,6 +51,37 @@ class WhatsApp(QObject):
         random_message_generator = RandomMessage(messages)
         return random_message_generator.random_message()
     
+    def find_contact(self, driver):
+
+        chats_xpath = "//div[contains(text(), 'Contacts on WhatsApp')]"
+        chat_element = WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.XPATH, chats_xpath))
+        )
+        _element = chat_element.find_element(By.XPATH, "ancestor::*[2]")
+        parent_element = _element.find_element(By.XPATH, "ancestor::*[1]")
+        WebDriverWait(driver, 30).until(EC.visibility_of(parent_element))
+        time.sleep(3)
+
+        try:
+            direct_child_divs = parent_element.find_elements(By.XPATH, "div")
+            contact = direct_child_divs[-1]
+            time.sleep(3)
+            contact.click()
+            print("Click successful!: Contacts on WhatsApp")
+        except Exception as e:
+            chats_xpath = "//div[contains(text(), 'Not in your contacts')]"
+            chat_element = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.XPATH, chats_xpath))
+            )
+            _element = chat_element.find_element(By.XPATH, "ancestor::*[1]")
+            direct_child_divs = _element.find_elements(By.XPATH, "div")
+            last_child_div = direct_child_divs[-1]
+            second_div = last_child_div.find_element(By.XPATH, "div[2]")
+            time.sleep(3)
+            second_div.click()
+            print("Click successful!: Not in your contacts")
+        return driver
+    
     def start_send_message(self, messages, phone_number_list):
         driver = self.driver
         for phone in phone_number_list:
@@ -60,28 +91,13 @@ class WhatsApp(QObject):
                     EC.presence_of_element_located((By.XPATH, "//div[@title='New chat']"))
                 )
                 time.sleep(5)
-                print(new_chat_button.get_attribute('innerHTML'))
+                # print(new_chat_button.get_attribute('innerHTML'))
                 new_chat_button.click()
                 phone_number_input = WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
                 )
                 phone_number_input.send_keys(phone)
-
-                chats_xpath = "//div[contains(text(), 'Contacts on WhatsApp')]"
-                chat_element = WebDriverWait(driver, 30).until(
-                    EC.presence_of_element_located((By.XPATH, chats_xpath))
-                )
-                
-                _element = chat_element.find_element(By.XPATH, "ancestor::*[2]")
-                parent_element = _element.find_element(By.XPATH, "ancestor::*[1]")
-                WebDriverWait(driver, 30).until(EC.visibility_of(parent_element))
-                time.sleep(3)
-
-                direct_child_divs = parent_element.find_elements(By.XPATH, "div")
-                last_child_div = direct_child_divs[-1]
-                time.sleep(3)
-                last_child_div.click()
-                
+                driver = self.find_contact(driver)
                 time.sleep(3)
                 type_a_message = WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Type a message']"))
@@ -103,6 +119,7 @@ class WhatsApp(QObject):
                 self.on_message_sent("success on phone number : " + phone)
             except Exception as e:
                 self.on_message_sent("failed on phone number : " + phone)
-                return "failed on phone number : " + phone
+                continue
+
         self.on_message_sent("All phone number successfully sent")
         return "All phone number successfully sent"

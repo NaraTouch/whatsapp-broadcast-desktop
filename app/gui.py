@@ -106,7 +106,7 @@ class GUI(QWidget):
 
     def show_main_gui(self):
         self.setMaximumSize(1920, 1080)
-        self.setMinimumSize(1200, 1000)
+        self.setMinimumSize(900, 1000)
         main_widgets_section = QWidget()
         main_widgets_layout = QVBoxLayout()
         main_widgets_section.setLayout(main_widgets_layout)
