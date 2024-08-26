@@ -28,6 +28,7 @@ class WhatsApp(QObject):
             self.options.add_argument(f"--user-data-dir={user_data_dir}")
             self.options.add_argument(f"--{profile}")
             self.options.add_argument("--disable-tflite-xnnpack")
+            # self.options.add_argument('headless')
             service = Service(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service, options=self.options)
             self.driver.get("https://web.whatsapp.com/")
@@ -93,10 +94,24 @@ class WhatsApp(QObject):
                 time.sleep(5)
                 # print(new_chat_button.get_attribute('innerHTML'))
                 new_chat_button.click()
+                
+                # Start New verion
                 phone_number_input = WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
                 )
-                phone_number_input.send_keys(phone)
+                phone_number_input.click()
+                pyperclip.copy(phone)
+                actions = ActionChains(driver)
+                actions.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+                # End New verion
+
+                # Start Old verion
+                # phone_number_input = WebDriverWait(driver, 60).until(
+                #     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
+                # )
+                # phone_number_input.send_keys(phone)
+                # End Old verion
+
                 driver = self.find_contact(driver)
                 time.sleep(3)
                 type_a_message = WebDriverWait(driver, 60).until(
