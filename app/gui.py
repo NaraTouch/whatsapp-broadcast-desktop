@@ -24,8 +24,8 @@ class GUI(QWidget):
             icon_path = 'app_icon.png'
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle("WhatsApp Broadcast")
-        self.setMaximumSize(1600, 1200)
-        self.setMinimumSize(800, 600)
+        self.setMaximumSize(500, 300)
+        self.setMinimumSize(300, 300)
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(20, 20, 20, 20)
@@ -45,7 +45,7 @@ class GUI(QWidget):
         username_label = QLabel("Username")
         username_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.username_entry = QLineEdit()
-        self.username_entry.setPlaceholderText(r"EX: example")
+        self.username_entry.setPlaceholderText(r"example@nomail.com")
         self.username_entry.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
         login_layout.addWidget(username_label)
         login_layout.addWidget(self.username_entry)
@@ -54,7 +54,7 @@ class GUI(QWidget):
         password_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.password_entry = QLineEdit()
         self.password_entry.setEchoMode(QLineEdit.Password)
-        self.password_entry.setPlaceholderText(r"EX: XXX@xxx")
+        self.password_entry.setPlaceholderText(r"XXX@xxx")
         self.password_entry.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
         login_layout.addWidget(password_label)
         login_layout.addWidget(self.password_entry)
@@ -105,6 +105,8 @@ class GUI(QWidget):
         )
 
     def show_main_gui(self):
+        self.setMaximumSize(1920, 1080)
+        self.setMinimumSize(1200, 1000)
         main_widgets_section = QWidget()
         main_widgets_layout = QVBoxLayout()
         main_widgets_section.setLayout(main_widgets_layout)
@@ -137,13 +139,40 @@ class GUI(QWidget):
         main_widgets_layout.addWidget(self.phone_edit)
 
         # Message field
-        message_label = QLabel("Message:")
+        message_label = QLabel("Template 1:")
         message_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.message_edit = QTextEdit()
-        self.message_edit.setPlaceholderText("Enter message")  # Add a placeholder text
+        self.message_edit.setPlaceholderText("Message Template 1")  # Add a placeholder text
         self.message_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
         main_widgets_layout.addWidget(message_label)
         main_widgets_layout.addWidget(self.message_edit)
+
+        # Message 2 field
+        message_label_2 = QLabel("Template 2:")
+        message_label_2.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        self.message_edit_2 = QTextEdit()
+        self.message_edit_2.setPlaceholderText("Message Template 2")  # Add a placeholder text
+        self.message_edit_2.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+        main_widgets_layout.addWidget(message_label_2)
+        main_widgets_layout.addWidget(self.message_edit_2)
+
+        # Message 3 field
+        message_label_3 = QLabel("Template 3:")
+        message_label_3.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        self.message_edit_3 = QTextEdit()
+        self.message_edit_3.setPlaceholderText("Message Template 2")  # Add a placeholder text
+        self.message_edit_3.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+        main_widgets_layout.addWidget(message_label_3)
+        main_widgets_layout.addWidget(self.message_edit_3)
+
+        # Message 3 field
+        message_label_4 = QLabel("Template 4:")
+        message_label_4.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        self.message_edit_4 = QTextEdit()
+        self.message_edit_4.setPlaceholderText("Message Template 2")  # Add a placeholder text
+        self.message_edit_4.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+        main_widgets_layout.addWidget(message_label_4)
+        main_widgets_layout.addWidget(self.message_edit_4)
         
         # Start broadcast button
         self.start_button = QPushButton("Start Broadcast")
@@ -171,8 +200,15 @@ class GUI(QWidget):
             "cursor: wait;"  # Change the cursor to a wait cursor
         )
 
-        message = self.message_edit.toPlainText()
-        # phone = self.phone_edit.text()
+        # message = self.message_edit.toPlainText()
+        # message2 = self.message_edit_2.toPlainText()
+        # message3 = self.message_edit_3.toPlainText()
+        # message4 = self.message_edit_4.toPlainText()
+        messages = []
+        for edit in [self.message_edit, self.message_edit_2, self.message_edit_3, self.message_edit_4]:
+            text = edit.toPlainText()
+            if text: messages.append(text)
+
         phone_numbers = self.phone_edit.toPlainText()
         phone_number_list = [phone_number.strip() for phone_number in phone_numbers.replace(',', '\n').split()]
         
@@ -182,7 +218,7 @@ class GUI(QWidget):
         whatsapp = WhatsApp()
 
         self.thread_pool = QThreadPool.globalInstance()
-        whatsapp_runnable = WhatsAppRunnable(whatsapp, message, phone_number_list, user_data_dir, profile)
+        whatsapp_runnable = WhatsAppRunnable(whatsapp, messages, phone_number_list, user_data_dir, profile)
         whatsapp_runnable.signals.finished.connect(self.on_whatsapp_runnable_finished)
         self.thread_pool.start(whatsapp_runnable)
 

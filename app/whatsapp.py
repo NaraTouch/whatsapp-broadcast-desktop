@@ -1,3 +1,4 @@
+import random
 import time
 import pyperclip
 from selenium import webdriver
@@ -10,6 +11,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from PyQt5.QtCore import pyqtSignal, QObject
+from .random_message import RandomMessage
 
 class WhatsApp(QObject):
     finished = pyqtSignal(str)
@@ -37,17 +39,22 @@ class WhatsApp(QObject):
     def on_message_sent(self, status):
         self.finished.emit(status)
 
-    def send_message(self, message, phone_number_list, user_data_dir, profile):
+    def send_message(self, messages, phone_number_list, user_data_dir, profile):
         self.driver = self.setup_browser(user_data_dir, profile)
         if self.driver is None:
             # self.finished.emit()
             self.on_message_sent("Before start please exit chrome browser at first")
             return "Before start please exit chrome browser at first"
-        return self.start_send_message(message, phone_number_list)
-
-    def start_send_message(self, message, phone_number_list):
+        return self.start_send_message(messages, phone_number_list)
+    
+    def random_message(self, messages):
+        random_message_generator = RandomMessage(messages)
+        return random_message_generator.random_message()
+    
+    def start_send_message(self, messages, phone_number_list):
         driver = self.driver
         for phone in phone_number_list:
+            message = self.random_message(messages)
             try:
                 new_chat_button = WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.XPATH, "//div[@title='New chat']"))
@@ -59,10 +66,12 @@ class WhatsApp(QObject):
                     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
                 )
                 phone_number_input.send_keys(phone)
+
                 chats_xpath = "//div[contains(text(), 'Contacts on WhatsApp')]"
                 chat_element = WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.XPATH, chats_xpath))
                 )
+                
                 _element = chat_element.find_element(By.XPATH, "ancestor::*[2]")
                 parent_element = _element.find_element(By.XPATH, "ancestor::*[1]")
                 WebDriverWait(driver, 30).until(EC.visibility_of(parent_element))

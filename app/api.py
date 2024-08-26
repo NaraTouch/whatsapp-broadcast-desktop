@@ -20,7 +20,7 @@ class Api(QObject):
         data = {"username": username, "password": password}
 
         try:
-            api = requests.post(url, headers=headers, json=data, timeout=30)
+            api = requests.post(url, headers=headers, json=data, timeout=60)
             api.raise_for_status()  
             response = api.json()
             if response:
