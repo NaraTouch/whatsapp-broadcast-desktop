@@ -36,7 +36,6 @@ class GUI(QWidget):
         self.login_section.setLayout(login_layout)
         self.login_section.setContentsMargins(20, 20, 20, 20)
        
-
         self.image_edit = QTextEdit()
         self.image_edit.setStyleSheet("background-color: transparent; border: none; padding: 5px;")
         self.image_edit.setDisabled(True)
@@ -106,7 +105,7 @@ class GUI(QWidget):
 
     def show_main_gui(self):
         self.setMaximumSize(1920, 1080)
-        self.setMinimumSize(900, 1000)
+        self.setMinimumSize(900, 700)
         main_widgets_section = QWidget()
         main_widgets_layout = QVBoxLayout()
         main_widgets_section.setLayout(main_widgets_layout)
@@ -117,17 +116,60 @@ class GUI(QWidget):
         self.user_data_dir_edit = QLineEdit()
         self.user_data_dir_edit.setPlaceholderText(r"EX: C:\Users\User\AppData\Local\Google\Chrome\User Data")
         self.user_data_dir_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        main_widgets_layout.addWidget(user_data_dir_label)
-        main_widgets_layout.addWidget(self.user_data_dir_edit)
+
+        user_data_dir_layout = QVBoxLayout()
+        user_data_dir_layout.addWidget(user_data_dir_label)
+        user_data_dir_layout.addWidget(self.user_data_dir_edit)
+
+        # Message/Hours field
+        message_interval_label = QLabel("Message/Hours:")
+        message_interval_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+        self.message_interval_edit = QLineEdit()
+        self.message_interval_edit.setPlaceholderText(r"EX: Minimum 15 second/message")
+        self.message_interval_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+
+        message_interval_layout = QVBoxLayout()
+        message_interval_layout.addWidget(message_interval_label)
+        message_interval_layout.addWidget(self.message_interval_edit)
+
+        # Create a single horizontal layout for both fields
+        row_layout = QHBoxLayout()
+        row_layout.addLayout(user_data_dir_layout)
+        row_layout.addLayout(message_interval_layout)
+
+        # Add the row layout to the main layout
+        main_widgets_layout.addLayout(row_layout)
 
         # Profile field
         profile_label = QLabel("Profile:")
         profile_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
+
         self.profile_edit = QLineEdit()
-        self.profile_edit.setPlaceholderText("EX: Profile 3")  # Add a placeholder text
+        self.profile_edit.setPlaceholderText("EX: Profile 1")  # Add a placeholder text
         self.profile_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+
+        self.profile_edit2 = QLineEdit()
+        self.profile_edit2.setPlaceholderText("EX: Profile 2")  # Add a placeholder text
+        self.profile_edit2.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+
+        self.profile_edit3 = QLineEdit()
+        self.profile_edit3.setPlaceholderText("EX: Profile 3")  # Add a placeholder text
+        self.profile_edit3.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+
+        self.profile_edit4 = QLineEdit()
+        self.profile_edit4.setPlaceholderText("EX: Profile 4")  # Add a placeholder text
+        self.profile_edit4.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
+
+        # Create a QHBoxLayout to hold the two QLineEdit widgets
+        profile_layout = QHBoxLayout()
+        profile_layout.addWidget(self.profile_edit)
+        profile_layout.addWidget(self.profile_edit2)
+        profile_layout.addWidget(self.profile_edit3)
+        profile_layout.addWidget(self.profile_edit4)
+
+        # Add the profile_layout to the main_widgets_layout
         main_widgets_layout.addWidget(profile_label)
-        main_widgets_layout.addWidget(self.profile_edit)
+        main_widgets_layout.addLayout(profile_layout)
 
         # Phone Number field
         phone_label = QLabel("Phone Numbers:")
@@ -144,35 +186,56 @@ class GUI(QWidget):
         self.message_edit = QTextEdit()
         self.message_edit.setPlaceholderText("Message Template 1")  # Add a placeholder text
         self.message_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        main_widgets_layout.addWidget(message_label)
-        main_widgets_layout.addWidget(self.message_edit)
 
-        # Message 2 field
+        message_layout_1 = QVBoxLayout()
+        message_layout_1.addWidget(message_label)
+        message_layout_1.addWidget(self.message_edit)
+
         message_label_2 = QLabel("Template 2:")
         message_label_2.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.message_edit_2 = QTextEdit()
         self.message_edit_2.setPlaceholderText("Message Template 2")  # Add a placeholder text
         self.message_edit_2.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        main_widgets_layout.addWidget(message_label_2)
-        main_widgets_layout.addWidget(self.message_edit_2)
+
+        message_layout_2 = QVBoxLayout()
+        message_layout_2.addWidget(message_label_2)
+        message_layout_2.addWidget(self.message_edit_2)
+
+        # Create a horizontal layout for the first two message fields
+        message_row_layout_1 = QHBoxLayout()
+        message_row_layout_1.addLayout(message_layout_1)
+        message_row_layout_1.addLayout(message_layout_2)
 
         # Message 3 field
         message_label_3 = QLabel("Template 3:")
         message_label_3.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.message_edit_3 = QTextEdit()
-        self.message_edit_3.setPlaceholderText("Message Template 2")  # Add a placeholder text
+        self.message_edit_3.setPlaceholderText("Message Template 3")  # Add a placeholder text
         self.message_edit_3.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        main_widgets_layout.addWidget(message_label_3)
-        main_widgets_layout.addWidget(self.message_edit_3)
 
-        # Message 3 field
+        message_layout_3 = QVBoxLayout()
+        message_layout_3.addWidget(message_label_3)
+        message_layout_3.addWidget(self.message_edit_3)
+
+        # Message 4 field
         message_label_4 = QLabel("Template 4:")
         message_label_4.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.message_edit_4 = QTextEdit()
-        self.message_edit_4.setPlaceholderText("Message Template 2")  # Add a placeholder text
+        self.message_edit_4.setPlaceholderText("Message Template 4")  # Add a placeholder text
         self.message_edit_4.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
-        main_widgets_layout.addWidget(message_label_4)
-        main_widgets_layout.addWidget(self.message_edit_4)
+
+        message_layout_4 = QVBoxLayout()
+        message_layout_4.addWidget(message_label_4)
+        message_layout_4.addWidget(self.message_edit_4)
+
+        # Create a horizontal layout for the last two message fields
+        message_row_layout_2 = QHBoxLayout()
+        message_row_layout_2.addLayout(message_layout_3)
+        message_row_layout_2.addLayout(message_layout_4)
+
+        # Add the row layouts to the main layout
+        main_widgets_layout.addLayout(message_row_layout_1)
+        main_widgets_layout.addLayout(message_row_layout_2)
         
         # Start broadcast button
         self.start_button = QPushButton("Start Broadcast")
@@ -209,16 +272,21 @@ class GUI(QWidget):
             text = edit.toPlainText()
             if text: messages.append(text)
 
+        profiles = []
+        for profile in [self.profile_edit, self.profile_edit2, self.profile_edit3, self.profile_edit4]:
+            text = profile.text()
+            if text: profiles.append(text)
+
         phone_numbers = self.phone_edit.toPlainText()
         phone_number_list = [phone_number.strip() for phone_number in phone_numbers.replace(',', '\n').split()]
-        
+        interval = int(self.message_interval_edit.text())
         user_data_dir = self.user_data_dir_edit.text()
-        profile = self.profile_edit.text()
+        # profile = self.profile_edit.text()
         # Create a WhatsApp instance
         whatsapp = WhatsApp()
 
         self.thread_pool = QThreadPool.globalInstance()
-        whatsapp_runnable = WhatsAppRunnable(whatsapp, messages, phone_number_list, user_data_dir, profile)
+        whatsapp_runnable = WhatsAppRunnable(whatsapp, messages, phone_number_list, user_data_dir, profiles, interval)
         whatsapp_runnable.signals.finished.connect(self.on_whatsapp_runnable_finished)
         self.thread_pool.start(whatsapp_runnable)
 
@@ -258,6 +326,11 @@ class GUI(QWidget):
             QMessageBox.critical(self, "Error", "Invalid Chrome Profile path")
             return False
 
+        message_interval = self.message_interval_edit.text()
+        if not re.match(r"^[0-9]+$", message_interval) or int(message_interval) < 15:
+            QMessageBox.critical(self, "Error", "Invalid Message interval. Robot speed sent message using 15 second per message.")
+            return False
+        
         # Profile field
         profile = self.profile_edit.text()
         if not re.match(r"^[a-zA-Z0-9\s]+$", profile):

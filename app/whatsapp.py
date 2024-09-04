@@ -11,6 +11,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from PyQt5.QtCore import pyqtSignal, QObject
+
+from app.random_profile import RandomProfile
 from .random_message import RandomMessage
 
 class WhatsApp(QObject):
@@ -23,10 +25,11 @@ class WhatsApp(QObject):
         # self.options.add_argument("--disable-tflite-xnnpack")
 
     def setup_browser(self, user_data_dir, profile):
+        print(f"Loading profile: {profile}")
         try:
             self.options = Options()
             self.options.add_argument(f"--user-data-dir={user_data_dir}")
-            self.options.add_argument(f"--{profile}")
+            self.options.add_argument(f"--profile-directory={profile}")  # Corrected argument
             self.options.add_argument("--disable-tflite-xnnpack")
             # self.options.add_argument('headless')
             service = Service(ChromeDriverManager().install())
@@ -40,13 +43,25 @@ class WhatsApp(QObject):
     def on_message_sent(self, status):
         self.finished.emit(status)
 
-    def send_message(self, messages, phone_number_list, user_data_dir, profile):
+    def chrome_driver(self, user_data_dir, profile):
         self.driver = self.setup_browser(user_data_dir, profile)
         if self.driver is None:
             # self.finished.emit()
             self.on_message_sent("Before start please exit chrome browser at first")
             return "Before start please exit chrome browser at first"
-        return self.start_send_message(messages, phone_number_list)
+        return self.driver
+    
+    def sent_interval(self, interval):
+        if(interval > 15):
+            return interval - 15
+        return 0
+
+    def send_message(self, messages, phone_number_list, user_data_dir, profiles, interval):
+        return self.start_send_message(messages, phone_number_list, user_data_dir, profiles, interval)
+    
+    def random_profile(self, profiles):
+        random_profile_generator = RandomProfile(profiles)
+        return random_profile_generator.random_profile()
     
     def random_message(self, messages):
         random_message_generator = RandomMessage(messages)
@@ -62,13 +77,13 @@ class WhatsApp(QObject):
         parent_element = _element.find_element(By.XPATH, "ancestor::*[1]")
         WebDriverWait(driver, 30).until(EC.visibility_of(parent_element))
         time.sleep(3)
-
+        find_step = 'Not Found'
         try:
             direct_child_divs = parent_element.find_elements(By.XPATH, "div")
             contact = direct_child_divs[-1]
             time.sleep(3)
             contact.click()
-            print("Click successful!: Contacts on WhatsApp")
+            find_step = "Click successful!: Contacts on WhatsApp"
         except Exception as e:
             chats_xpath = "//div[contains(text(), 'Not in your contacts')]"
             chat_element = WebDriverWait(driver, 30).until(
@@ -80,61 +95,72 @@ class WhatsApp(QObject):
             second_div = last_child_div.find_element(By.XPATH, "div[2]")
             time.sleep(3)
             second_div.click()
-            print("Click successful!: Not in your contacts")
+            find_step = "Click successful!: Not in your contacts"
+        print(find_step)
         return driver
     
-    def start_send_message(self, messages, phone_number_list):
-        driver = self.driver
+    def start_send_message(self, messages, phone_number_list, user_data_dir, profiles, interval):
         for phone in phone_number_list:
-            message = self.random_message(messages)
-            try:
-                new_chat_button = WebDriverWait(driver, 60).until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@title='New chat']"))
-                )
-                time.sleep(5)
-                # print(new_chat_button.get_attribute('innerHTML'))
-                new_chat_button.click()
-                
-                # Start New verion
-                phone_number_input = WebDriverWait(driver, 60).until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
-                )
-                phone_number_input.click()
-                pyperclip.copy(phone)
-                actions = ActionChains(driver)
-                actions.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-                # End New verion
+            sleep_interval = self.sent_interval(interval)
+            print("deplay:" + str(sleep_interval)) 
+            if (sleep_interval > 0) :
+                time.sleep(sleep_interval)
 
-                # Start Old verion
-                # phone_number_input = WebDriverWait(driver, 60).until(
-                #     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
-                # )
-                # phone_number_input.send_keys(phone)
-                # End Old verion
+            profile = self.random_profile(profiles)
+            self.chrome_driver(user_data_dir, profile)
+            driver = self.driver
+            if driver is not None:
+                message = self.random_message(messages)
+                try:
+                    new_chat_button = WebDriverWait(driver, 60).until(
+                        EC.presence_of_element_located((By.XPATH, "//div[@title='New chat']"))
+                    )
+                    time.sleep(5)
+                    # print(new_chat_button.get_attribute('innerHTML'))
+                    new_chat_button.click()
+                    
+                    # Start New verion
+                    phone_number_input = WebDriverWait(driver, 60).until(
+                        EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
+                    )
+                    phone_number_input.click()
+                    pyperclip.copy(phone)
+                    actions = ActionChains(driver)
+                    actions.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+                    # End New verion
 
-                driver = self.find_contact(driver)
-                time.sleep(3)
-                type_a_message = WebDriverWait(driver, 60).until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Type a message']"))
-                )
-                type_a_message.click()
+                    # Start Old verion
+                    # phone_number_input = WebDriverWait(driver, 60).until(
+                    #     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
+                    # )
+                    # phone_number_input.send_keys(phone)
+                    # End Old verion
 
-                # Copy the message
-                pyperclip.copy(message)
+                    driver = self.find_contact(driver)
+                    time.sleep(3)
+                    type_a_message = WebDriverWait(driver, 60).until(
+                        EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Type a message']"))
+                    )
+                    type_a_message.click()
 
-                # Paste the message
-                actions = ActionChains(driver)
-                actions.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+                    # Copy the message
+                    pyperclip.copy(message)
 
-                send_button_div = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, "//button [@aria-label='Send']"))
-                )
-                send_button_div.click()
-                time.sleep(3)
-                self.on_message_sent("success on phone number : " + phone)
-            except Exception as e:
-                self.on_message_sent("failed on phone number : " + phone)
-                continue
+                    # Paste the message
+                    actions = ActionChains(driver)
+                    actions.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+
+                    send_button_div = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.XPATH, "//button [@aria-label='Send']"))
+                    )
+                    send_button_div.click()
+                    time.sleep(3)
+                    self.on_message_sent("success on phone number : " + phone)
+                except Exception as e:
+                    self.on_message_sent("failed on phone number : " + phone)
+                    continue
+                finally:
+                    driver.quit()  # Close the browser after each message
 
         self.on_message_sent("All phone number successfully sent")
         return "All phone number successfully sent"

@@ -33,7 +33,10 @@
 
 C:\Users\User\AppData\Local\Google\Chrome\User Data
 
+Profile 2
+Profile 4
 Profile 3
+Profile 11
 
 C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 3
 
