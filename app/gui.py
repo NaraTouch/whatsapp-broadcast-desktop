@@ -122,10 +122,10 @@ class GUI(QWidget):
         user_data_dir_layout.addWidget(self.user_data_dir_edit)
 
         # Message/Hours field
-        message_interval_label = QLabel("Message/Hours:")
+        message_interval_label = QLabel("Message Per Second:")
         message_interval_label.setStyleSheet("font-weight: bold; font-size: 12pt;")  # Make the label bold and larger
         self.message_interval_edit = QLineEdit()
-        self.message_interval_edit.setPlaceholderText(r"EX: Minimum 15 second/message")
+        self.message_interval_edit.setPlaceholderText(r"EX: default Random sent bewteen 10 to 15 second per message")
         self.message_interval_edit.setStyleSheet("border: 1px solid #ccc; border-radius: 5px; padding: 5px;")  # Add some styling to the edit field
 
         message_interval_layout = QVBoxLayout()
@@ -327,8 +327,8 @@ class GUI(QWidget):
             return False
 
         message_interval = self.message_interval_edit.text()
-        if not re.match(r"^[0-9]+$", message_interval) or int(message_interval) < 15:
-            QMessageBox.critical(self, "Error", "Invalid Message interval. Robot speed sent message using 15 second per message.")
+        if not re.match(r"^[0-9]+$", message_interval) or int(message_interval) < 0:
+            QMessageBox.critical(self, "Error", "Invalid Delay value. must be bigger than 0.")
             return False
         
         # Profile field

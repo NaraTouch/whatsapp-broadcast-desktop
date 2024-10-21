@@ -29,15 +29,22 @@ class WhatsApp(QObject):
         try:
             self.options = Options()
             self.options.add_argument(f"--user-data-dir={user_data_dir}")
-            self.options.add_argument(f"--profile-directory={profile}")  # Corrected argument
+            self.options.add_argument(f"--profile-directory={profile}")
             self.options.add_argument("--disable-tflite-xnnpack")
-            # self.options.add_argument('headless')
+            
             service = Service(ChromeDriverManager().install())
+            print("Initializing ChromeDriver...")
             self.driver = webdriver.Chrome(service=service, options=self.options)
+            if self.driver is None:
+                print("ChromeDriver initialization failed.")
+            else:
+                print("ChromeDriver initialized successfully.")
             self.driver.get("https://web.whatsapp.com/")
+            
             WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.XPATH, "//div[@title='New chat']")))
             return self.driver
         except Exception as e:
+            print(f"Error setting up the browser: {e}")  # Print the error
             return None
         
     def on_message_sent(self, status):
@@ -52,8 +59,8 @@ class WhatsApp(QObject):
         return self.driver
     
     def sent_interval(self, interval):
-        if(interval > 15):
-            return interval - 15
+        if(interval > 0):
+            return random.randint(1, interval)
         return 0
 
     def send_message(self, messages, phone_number_list, user_data_dir, profiles, interval):
@@ -100,6 +107,7 @@ class WhatsApp(QObject):
         return driver
     
     def start_send_message(self, messages, phone_number_list, user_data_dir, profiles, interval):
+        print("start_send_message:" + str(profiles))
         for phone in phone_number_list:
             sleep_interval = self.sent_interval(interval)
             print("deplay:" + str(sleep_interval)) 
@@ -109,20 +117,28 @@ class WhatsApp(QObject):
             profile = self.random_profile(profiles)
             self.chrome_driver(user_data_dir, profile)
             driver = self.driver
+            print(driver)
             if driver is not None:
                 message = self.random_message(messages)
+                print("message:" + str(message))
                 try:
                     new_chat_button = WebDriverWait(driver, 60).until(
                         EC.presence_of_element_located((By.XPATH, "//div[@title='New chat']"))
                     )
                     time.sleep(5)
+                    
                     # print(new_chat_button.get_attribute('innerHTML'))
                     new_chat_button.click()
                     
                     # Start New verion
+                    # phone_number_input = WebDriverWait(driver, 60).until(
+                    #     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
+                    # )
+                    # print(phone_number_input.get_attribute('innerHTML'))
                     phone_number_input = WebDriverWait(driver, 60).until(
-                        EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Search name or number']"))
+                        EC.presence_of_element_located((By.CSS_SELECTOR, ".lexical-rich-text-input"))
                     )
+                    print(phone_number_input.get_attribute('innerHTML'))
                     phone_number_input.click()
                     pyperclip.copy(phone)
                     actions = ActionChains(driver)
@@ -139,7 +155,7 @@ class WhatsApp(QObject):
                     driver = self.find_contact(driver)
                     time.sleep(3)
                     type_a_message = WebDriverWait(driver, 60).until(
-                        EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Type a message']"))
+                        EC.presence_of_element_located((By.XPATH, "//div[@aria-placeholder='Type a message']"))
                     )
                     type_a_message.click()
 
